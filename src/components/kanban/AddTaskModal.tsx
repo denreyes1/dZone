@@ -1,8 +1,8 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { TagInput } from './TagInput';
+import { TagInput, type TagInputHandle } from './TagInput';
 import type { ColumnConfig, TaskTag } from '@/types/kanban';
 
 interface AddTaskModalProps {
@@ -18,6 +18,7 @@ export function AddTaskModal({ open, onClose, onAdd, defaultColumn, columns }: A
   const [description, setDescription] = useState('');
   const [column, setColumn] = useState<string>(defaultColumn);
   const [tags, setTags] = useState<TaskTag[]>([]);
+  const tagInputRef = useRef<TagInputHandle>(null);
 
   useEffect(() => {
     if (open) {
@@ -32,7 +33,8 @@ export function AddTaskModal({ open, onClose, onAdd, defaultColumn, columns }: A
     e.preventDefault();
     const trimmed = title.trim();
     if (!trimmed) return;
-    onAdd(trimmed, description.trim(), column, tags);
+    const finalTags = tagInputRef.current?.flush() ?? tags;
+    onAdd(trimmed, description.trim(), column, finalTags);
     setTitle('');
     setDescription('');
     setColumn(defaultColumn);
@@ -65,7 +67,7 @@ export function AddTaskModal({ open, onClose, onAdd, defaultColumn, columns }: A
             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-gray-100 placeholder:text-gray-500 focus:border-accent-amber/40 focus:outline-none focus:ring-2 focus:ring-accent-amber/40"
           />
         </div>
-        <TagInput tags={tags} onChange={setTags} />
+        <TagInput ref={tagInputRef} tags={tags} onChange={setTags} />
         <div className="space-y-1.5">
           <label className="block text-sm font-medium text-gray-300">Column</label>
           <div className="flex flex-wrap gap-2">

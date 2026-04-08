@@ -1,8 +1,8 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { TagInput } from './TagInput';
+import { TagInput, type TagInputHandle } from './TagInput';
 import type { BoardTask, ColumnConfig, TaskTag } from '@/types/kanban';
 
 interface EditTaskModalProps {
@@ -18,6 +18,7 @@ export function EditTaskModal({ task, onClose, onSave, onDelete, columns }: Edit
   const [description, setDescription] = useState('');
   const [column, setColumn] = useState<string>('');
   const [tags, setTags] = useState<TaskTag[]>([]);
+  const tagInputRef = useRef<TagInputHandle>(null);
 
   useEffect(() => {
     if (task) {
@@ -31,7 +32,8 @@ export function EditTaskModal({ task, onClose, onSave, onDelete, columns }: Edit
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!task || !title.trim()) return;
-    onSave(task.id, { title: title.trim(), description: description.trim(), column, tags });
+    const finalTags = tagInputRef.current?.flush() ?? tags;
+    onSave(task.id, { title: title.trim(), description: description.trim(), column, tags: finalTags });
     onClose();
   }
 
@@ -64,7 +66,7 @@ export function EditTaskModal({ task, onClose, onSave, onDelete, columns }: Edit
             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-gray-100 placeholder:text-gray-500 focus:border-accent-amber/40 focus:outline-none focus:ring-2 focus:ring-accent-amber/40"
           />
         </div>
-        <TagInput tags={tags} onChange={setTags} />
+        <TagInput ref={tagInputRef} tags={tags} onChange={setTags} />
         <div className="space-y-1.5">
           <label className="block text-sm font-medium text-gray-300">Column</label>
           <div className="flex flex-wrap gap-2">
