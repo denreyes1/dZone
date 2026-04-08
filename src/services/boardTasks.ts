@@ -13,7 +13,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
-import type { BoardTask } from '@/types/kanban';
+import type { BoardTask, TaskTag } from '@/types/kanban';
 import type { Task } from '@/types';
 
 function boardTasksRef(uid: string) {
@@ -30,6 +30,7 @@ export async function addBoardTask(
   description: string,
   column: string,
   order: number,
+  tags: TaskTag[] = [],
 ): Promise<string> {
   if (!db) throw new Error('Firestore not available');
   const docRef = await addDoc(boardTasksRef(uid), {
@@ -37,6 +38,7 @@ export async function addBoardTask(
     description,
     column,
     order,
+    tags,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -96,6 +98,7 @@ export async function migrateLegacyTasks(uid: string): Promise<BoardTask[]> {
       description: '',
       column,
       order: index,
+      tags: [],
       createdAt: old.createdAt ?? null,
       updatedAt: null,
     };

@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DndContext,
   DragOverlay,
@@ -28,7 +29,7 @@ import { ColumnManagerModal } from './ColumnManagerModal';
 import { PinnedColumnView } from './PinnedColumnView';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useUIStore } from '@/stores/uiStore';
-import type { BoardTask } from '@/types/kanban';
+import type { BoardTask, TaskTag } from '@/types/kanban';
 
 type ColumnItems = Record<string, BoardTask[]>;
 
@@ -234,7 +235,7 @@ export function KanbanBoard() {
 
   function handleEditSave(
     id: string,
-    updates: { title: string; description: string; column: string },
+    updates: { title: string; description: string; column: string; tags: TaskTag[] },
   ) {
     updateTask(id, updates);
   }
@@ -281,16 +282,23 @@ export function KanbanBoard() {
 
     return (
       <>
-        {visibleColumns.map((col) => {
-          const colTasks = tasks
-            .filter((t) => t.column === col.id)
-            .sort((a, b) => a.order - b.order);
-
-          return (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={(args) => {
+            const pointerCollisions = pointerWithin(args);
+            if (pointerCollisions.length > 0) return pointerCollisions;
+            return rectIntersection(args);
+          }}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          {visibleColumns.map((col) => (
             <PinnedColumnView
               key={col.id}
               config={col}
-              tasks={colTasks}
+              tasks={rendered[col.id] ?? []}
               onUnpin={() => setPinnedAllIds(new Set())}
               onClose={() => closePinnedColumn(col.id)}
               onAddClick={() => setAddColumnTarget(col.id)}
@@ -301,9 +309,26 @@ export function KanbanBoard() {
                   updateTask(id, { order, column: col.id });
                 });
               }}
+              externalDnd
             />
-          );
-        })}
+          ))}
+
+          {createPortal(
+            <DragOverlay dropAnimation={null}>
+              {activeTask && (
+                <div className="w-64 md:w-72">
+                  <TaskCard
+                    task={activeTask}
+                    onEdit={() => {}}
+                    onDelete={() => {}}
+                    isDragOverlay
+                  />
+                </div>
+              )}
+            </DragOverlay>,
+            document.body,
+          )}
+        </DndContext>
 
         <AddTaskModal
           open={addColumnTarget !== null}
@@ -430,18 +455,21 @@ export function KanbanBoard() {
               ))}
             </div>
 
-            <DragOverlay dropAnimation={null}>
-              {activeTask && (
-                <div className="w-64 md:w-72">
-                  <TaskCard
-                    task={activeTask}
-                    onEdit={() => {}}
-                    onDelete={() => {}}
-                    isDragOverlay
-                  />
-                </div>
-              )}
-            </DragOverlay>
+            {createPortal(
+              <DragOverlay dropAnimation={null}>
+                {activeTask && (
+                  <div className="w-64 md:w-72">
+                    <TaskCard
+                      task={activeTask}
+                      onEdit={() => {}}
+                      onDelete={() => {}}
+                      isDragOverlay
+                    />
+                  </div>
+                )}
+              </DragOverlay>,
+              document.body,
+            )}
           </DndContext>
         </motion.div>
 

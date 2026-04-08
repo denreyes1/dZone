@@ -28,12 +28,18 @@ export const COLOR_PRESETS: { name: string; hex: string; textClass: string }[] =
   { name: 'Indigo', hex: '#818cf8', textClass: 'text-indigo-400' },
 ];
 
+export interface TaskTag {
+  label: string;
+  color: string;
+}
+
 export interface BoardTask {
   id: string;
   title: string;
   description: string;
   column: string;
   order: number;
+  tags: TaskTag[];
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 }

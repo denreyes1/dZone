@@ -27,6 +27,23 @@ function TaskCardContent({ task, onEdit, onDelete, isDragOverlay }: TaskCardProp
             {task.description}
           </p>
         )}
+        {task.tags?.length > 0 && (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {task.tags.map((tag, i) => (
+              <span
+                key={i}
+                className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium leading-tight"
+                style={{
+                  backgroundColor: tag.color + '20',
+                  color: tag.color,
+                  border: `1px solid ${tag.color}30`,
+                }}
+              >
+                {tag.label}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {!isDragOverlay && (

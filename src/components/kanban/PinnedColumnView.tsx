@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DndContext,
   DragOverlay,
@@ -40,6 +41,7 @@ interface PinnedColumnViewProps {
   onEditTask: (task: BoardTask) => void;
   onDeleteTask: (id: string) => void;
   onReorder: (tasks: { id: string; order: number }[]) => void;
+  externalDnd?: boolean;
 }
 
 export function PinnedColumnView({
@@ -51,6 +53,7 @@ export function PinnedColumnView({
   onEditTask,
   onDeleteTask,
   onReorder,
+  externalDnd = false,
 }: PinnedColumnViewProps) {
   const drag = usePanelDrag(
     `pinned-${config.id}`,
@@ -68,11 +71,11 @@ export function PinnedColumnView({
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [localTasks, setLocalTasks] = useState<BoardTask[] | null>(null);
 
-  const displayed = localTasks ?? tasks;
+  const displayed = externalDnd ? tasks : (localTasks ?? tasks);
   const itemIds = useMemo(() => displayed.map((t) => t.id), [displayed]);
   const activeTask = useMemo(
-    () => (activeId ? displayed.find((t) => t.id === activeId) ?? null : null),
-    [activeId, displayed],
+    () => (!externalDnd && activeId ? displayed.find((t) => t.id === activeId) ?? null : null),
+    [activeId, displayed, externalDnd],
   );
 
   const { setNodeRef } = useDroppable({ id: config.id });
@@ -114,6 +117,30 @@ export function PinnedColumnView({
     setActiveId(null);
     setLocalTasks(null);
   }, []);
+
+  const taskList = (
+    <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+      <div
+        ref={setNodeRef}
+        className="flex flex-1 flex-col gap-2 overflow-y-auto"
+      >
+        {displayed.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            onEdit={onEditTask}
+            onDelete={onDeleteTask}
+          />
+        ))}
+
+        {displayed.length === 0 && (
+          <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-white/10 py-8">
+            <p className="text-xs text-gray-600">No tasks</p>
+          </div>
+        )}
+      </div>
+    </SortableContext>
+  );
 
   return (
     <div
@@ -161,47 +188,33 @@ export function PinnedColumnView({
           </div>
         </div>
 
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-          <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
-            <div
-              ref={setNodeRef}
-              className="flex flex-1 flex-col gap-2 overflow-y-auto"
-            >
-              {displayed.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onEdit={onEditTask}
-                  onDelete={onDeleteTask}
-                />
-              ))}
-
-              {displayed.length === 0 && (
-                <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-white/10 py-8">
-                  <p className="text-xs text-gray-600">No tasks</p>
-                </div>
-              )}
-            </div>
-          </SortableContext>
-
-          <DragOverlay dropAnimation={null}>
-            {activeTask && (
-              <div style={{ width: resize.size.w - 24 }}>
-                <TaskCard
-                  task={activeTask}
-                  onEdit={() => {}}
-                  onDelete={() => {}}
-                  isDragOverlay
-                />
-              </div>
+        {externalDnd ? (
+          taskList
+        ) : (
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            {taskList}
+            {createPortal(
+              <DragOverlay dropAnimation={null}>
+                {activeTask && (
+                  <div style={{ width: resize.size.w - 24 }}>
+                    <TaskCard
+                      task={activeTask}
+                      onEdit={() => {}}
+                      onDelete={() => {}}
+                      isDragOverlay
+                    />
+                  </div>
+                )}
+              </DragOverlay>,
+              document.body,
             )}
-          </DragOverlay>
-        </DndContext>
+          </DndContext>
+        )}
       </motion.div>
 
       {RESIZE_EDGES.map(({ edge, className }) => (
