@@ -5,37 +5,16 @@ export const SCENES: Scene[] = [
     id: 'ambience-1',
     name: 'Ambience I',
     description: 'Immersive looping video backdrop',
-    videoId: 'z9Ug-3qhrwY',
-    gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+    videoId: 'lGphuanCRDk',
+    gradient: 'linear-gradient(135deg, #2d1b0e 0%, #1a1207 50%, #0f0d08 100%)',
   },
   {
     id: 'ambience-2',
     name: 'Ambience II',
     description: 'Immersive looping video backdrop',
-    videoId: 'lGphuanCRDk',
-    gradient: 'linear-gradient(135deg, #2d1b0e 0%, #1a1207 50%, #0f0d08 100%)',
-  },
-  {
-    id: 'ambience-3',
-    name: 'Ambience III',
-    description: 'Immersive looping video backdrop',
     videoId: 'h9yya-j_kjE',
     gradient: 'linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #0a0a20 100%)',
-  },
-  {
-    id: 'ambience-4',
-    name: 'Ambience IV',
-    description: 'Immersive looping video backdrop',
-    videoId: 'ssz9IHUEfC4',
-    gradient: 'linear-gradient(135deg, #1c1410 0%, #2a1f15 50%, #0f0c08 100%)',
-  },
-  {
-    id: 'ambience-5',
-    name: 'Ambience V',
-    description: 'Immersive looping video backdrop',
-    videoId: 'ArDi0mV15vY',
-    gradient: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
-  },
+  }
 ];
 
 export const SOUND_CATEGORIES: { id: SoundCategory; label: string; icon: string }[] = [

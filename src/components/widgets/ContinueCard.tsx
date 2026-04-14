@@ -3,7 +3,7 @@ import { Play } from 'lucide-react';
 import { useSessions } from '@/hooks/useSessions';
 import { useSceneStore } from '@/stores/sceneStore';
 import { useTimerStore } from '@/stores/timerStore';
-import { SCENES } from '@/utils/constants';
+import { useSceneHistory } from '@/hooks/useSceneHistory';
 import { formatDuration } from '@/utils/formatTime';
 import { Button } from '@/components/ui/Button';
 
@@ -11,11 +11,12 @@ export function ContinueCard() {
   const { recentSessions } = useSessions();
   const setActiveScene = useSceneStore((s) => s.setActiveScene);
   const start = useTimerStore((s) => s.start);
+  const { allScenes } = useSceneHistory();
 
   const lastSession = recentSessions[0];
   if (!lastSession) return null;
 
-  const scene = SCENES.find((s) => s.id === lastSession.sceneId);
+  const scene = allScenes.find((s) => s.id === lastSession.sceneId);
   if (!scene) return null;
 
   const thumbnailUrl = `https://img.youtube.com/vi/${scene.videoId}/hqdefault.jpg`;

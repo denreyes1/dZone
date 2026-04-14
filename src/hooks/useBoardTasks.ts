@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { isFirebaseAvailable } from '@/config/firebase';
 import * as service from '@/services/boardTasks';
-import type { BoardTask, TaskTag } from '@/types/kanban';
+import type { BoardTask, TaskTag, ChecklistItem } from '@/types/kanban';
 
 const LOCAL_KEY = 'dzone_board_tasks';
 
@@ -48,7 +48,7 @@ export function useBoardTasks() {
   }, [user?.uid]);
 
   const addTask = useCallback(
-    async (title: string, description: string, column: string, tags: TaskTag[] = []) => {
+    async (title: string, description: string, column: string, tags: TaskTag[] = [], checklist: ChecklistItem[] = []) => {
       const colTasks = tasks.filter((t) => t.column === column);
       const order = colTasks.length;
       const id = crypto.randomUUID();
@@ -57,6 +57,7 @@ export function useBoardTasks() {
         id,
         title,
         description,
+        checklist,
         column,
         order,
         tags,
@@ -68,7 +69,7 @@ export function useBoardTasks() {
 
       if (user?.uid && isFirebaseAvailable()) {
         try {
-          await service.addBoardTask(user.uid, title, description, column, order, tags);
+          await service.addBoardTask(user.uid, title, description, column, order, tags, checklist);
         } catch (e: any) {
           setError(e.message);
         }
@@ -78,7 +79,7 @@ export function useBoardTasks() {
   );
 
   const updateTask = useCallback(
-    async (taskId: string, updates: Partial<Pick<BoardTask, 'title' | 'description' | 'column' | 'order' | 'tags'>>) => {
+    async (taskId: string, updates: Partial<Pick<BoardTask, 'title' | 'description' | 'checklist' | 'column' | 'order' | 'tags'>>) => {
       setTasks((prev) =>
         prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t)),
       );

@@ -1,11 +1,12 @@
 import { usePreferences } from '@/hooks/usePreferences';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { SCENES } from '@/utils/constants';
+import { useSceneHistory } from '@/hooks/useSceneHistory';
 import { useState } from 'react';
 
 export function SettingsForm() {
   const { preferences, updatePreferences } = usePreferences();
+  const { allScenes } = useSceneHistory();
   const [focus, setFocus] = useState(preferences.focusDuration);
   const [brk, setBrk] = useState(preferences.breakDuration);
   const [longBrk, setLongBrk] = useState(preferences.longBreakDuration);
@@ -66,7 +67,7 @@ export function SettingsForm() {
           onChange={(e) => setScene(e.target.value)}
           className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-gray-100 focus:border-accent-amber/40 focus:outline-none focus:ring-2 focus:ring-accent-amber/40"
         >
-          {SCENES.map((s) => (
+          {allScenes.map((s) => (
             <option key={s.id} value={s.id} className="bg-panel">
               {s.name}
             </option>

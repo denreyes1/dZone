@@ -1,11 +1,16 @@
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSceneStore } from '@/stores/sceneStore';
-import { SCENES } from '@/utils/constants';
+import { useSceneHistory } from '@/hooks/useSceneHistory';
 
 export function SceneViewer() {
   const activeSceneId = useSceneStore((s) => s.activeSceneId);
-  const scene = useMemo(() => SCENES.find((s) => s.id === activeSceneId) ?? SCENES[0], [activeSceneId]);
+  const { allScenes } = useSceneHistory();
+
+  const scene = useMemo(
+    () => allScenes.find((s) => s.id === activeSceneId) ?? allScenes[0],
+    [activeSceneId, allScenes],
+  );
 
   const embedUrl = `https://www.youtube.com/embed/${scene.videoId}?autoplay=1&mute=1&loop=1&playlist=${scene.videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1`;
 

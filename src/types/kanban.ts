@@ -33,10 +33,16 @@ export interface TaskTag {
   color: string;
 }
 
+export interface ChecklistItem {
+  text: string;
+  checked: boolean;
+}
+
 export interface BoardTask {
   id: string;
   title: string;
   description: string;
+  checklist: ChecklistItem[];
   column: string;
   order: number;
   tags: TaskTag[];

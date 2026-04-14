@@ -16,23 +16,7 @@ const TAG_COLORS = [
   '#818cf8',
 ];
 
-const HISTORY_KEY = 'dzone_tag_history';
 const MAX_SUGGESTIONS = 8;
-
-function loadHistory(): TaskTag[] {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function persistHistory(tag: TaskTag) {
-  const history = loadHistory();
-  if (!history.some((t) => t.label.toLowerCase() === tag.label.toLowerCase())) {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify([...history, tag]));
-  }
-}
 
 export interface TagInputHandle {
   flush: () => TaskTag[];
@@ -41,13 +25,14 @@ export interface TagInputHandle {
 interface TagInputProps {
   tags: TaskTag[];
   onChange: (tags: TaskTag[]) => void;
+  history: TaskTag[];
+  onAddToHistory: (tag: TaskTag) => void;
 }
 
 export const TagInput = forwardRef<TagInputHandle, TagInputProps>(
-  function TagInput({ tags, onChange }, ref) {
+  function TagInput({ tags, onChange, history, onAddToHistory }, ref) {
     const [input, setInput] = useState('');
     const [selectedColor, setSelectedColor] = useState(TAG_COLORS[0]);
-    const [history, setHistory] = useState(loadHistory);
     const inputRef = useRef<HTMLInputElement>(null);
 
     function addTagWith(label: string, color: string): TaskTag[] {
@@ -57,8 +42,7 @@ export const TagInput = forwardRef<TagInputHandle, TagInputProps>(
       const newTag = { label: trimmed, color };
       const updated = [...tags, newTag];
       onChange(updated);
-      persistHistory(newTag);
-      setHistory(loadHistory());
+      onAddToHistory(newTag);
       setInput('');
       return updated;
     }

@@ -13,10 +13,11 @@ interface KanbanColumnProps {
   onAddClick: (column: string) => void;
   onEditTask: (task: BoardTask) => void;
   onDeleteTask: (id: string) => void;
+  onUpdateTask?: (id: string, updates: Partial<BoardTask>) => void;
   onPin?: (column: string) => void;
 }
 
-export function KanbanColumn({ column, config, tasks, onAddClick, onEditTask, onDeleteTask, onPin }: KanbanColumnProps) {
+export function KanbanColumn({ column, config, tasks, onAddClick, onEditTask, onDeleteTask, onUpdateTask, onPin }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: column });
   const itemIds = useMemo(() => tasks.map((t) => t.id), [tasks]);
 
@@ -64,6 +65,7 @@ export function KanbanColumn({ column, config, tasks, onAddClick, onEditTask, on
               task={task}
               onEdit={onEditTask}
               onDelete={onDeleteTask}
+              onUpdate={onUpdateTask}
             />
           ))}
 

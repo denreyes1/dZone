@@ -19,6 +19,7 @@ import { motion } from 'framer-motion';
 import { X, Settings, Pin, PinOff } from 'lucide-react';
 import { useBoardTasks } from '@/hooks/useBoardTasks';
 import { useBoardColumns } from '@/hooks/useBoardColumns';
+import { useTagHistory } from '@/hooks/useTagHistory';
 import { usePanelDrag } from '@/hooks/usePanelDrag';
 import { usePanelResize, type ResizeEdge } from '@/hooks/usePanelResize';
 import { KanbanColumn } from './KanbanColumn';
@@ -29,7 +30,7 @@ import { ColumnManagerModal } from './ColumnManagerModal';
 import { PinnedColumnView } from './PinnedColumnView';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useUIStore } from '@/stores/uiStore';
-import type { BoardTask, TaskTag } from '@/types/kanban';
+import type { BoardTask, TaskTag, ChecklistItem } from '@/types/kanban';
 
 type ColumnItems = Record<string, BoardTask[]>;
 
@@ -63,6 +64,7 @@ function groupByColumn(tasks: BoardTask[], columnIds: string[]): ColumnItems {
 export function KanbanBoard() {
   const { tasks, loading: tasksLoading, error, addTask, updateTask, deleteTask, moveTask, moveTasksBulk } =
     useBoardTasks();
+  const { history: tagHistory, addToHistory: addToTagHistory } = useTagHistory();
   const {
     columns: boardColumns,
     columnIds,
@@ -235,7 +237,7 @@ export function KanbanBoard() {
 
   function handleEditSave(
     id: string,
-    updates: { title: string; description: string; column: string; tags: TaskTag[] },
+    updates: { title: string; description: string; column: string; tags: TaskTag[]; checklist: ChecklistItem[] },
   ) {
     updateTask(id, updates);
   }
@@ -304,6 +306,7 @@ export function KanbanBoard() {
               onAddClick={() => setAddColumnTarget(col.id)}
               onEditTask={setEditingTask}
               onDeleteTask={deleteTask}
+              onUpdateTask={updateTask}
               onReorder={(items) => {
                 items.forEach(({ id, order }) => {
                   updateTask(id, { order, column: col.id });
@@ -336,6 +339,8 @@ export function KanbanBoard() {
           onAdd={addTask}
           defaultColumn={addColumnTarget ?? (columnIds[0] || '')}
           columns={boardColumns}
+          tagHistory={tagHistory}
+          onAddToTagHistory={addToTagHistory}
         />
 
         <EditTaskModal
@@ -344,6 +349,8 @@ export function KanbanBoard() {
           onSave={handleEditSave}
           onDelete={deleteTask}
           columns={boardColumns}
+          tagHistory={tagHistory}
+          onAddToTagHistory={addToTagHistory}
         />
       </>
     );
@@ -360,6 +367,7 @@ export function KanbanBoard() {
           onAddClick={() => setAddColumnTarget(pinnedColumnId)}
           onEditTask={setEditingTask}
           onDeleteTask={deleteTask}
+          onUpdateTask={updateTask}
           onReorder={(items) => {
             items.forEach(({ id, order }) => {
               updateTask(id, { order, column: pinnedColumnId! });
@@ -373,6 +381,8 @@ export function KanbanBoard() {
           onAdd={addTask}
           defaultColumn={addColumnTarget ?? pinnedColumnId!}
           columns={boardColumns}
+          tagHistory={tagHistory}
+          onAddToTagHistory={addToTagHistory}
         />
 
         <EditTaskModal
@@ -381,6 +391,8 @@ export function KanbanBoard() {
           onSave={handleEditSave}
           onDelete={deleteTask}
           columns={boardColumns}
+          tagHistory={tagHistory}
+          onAddToTagHistory={addToTagHistory}
         />
       </>
     );
@@ -450,6 +462,7 @@ export function KanbanBoard() {
                   onAddClick={(c) => setAddColumnTarget(c)}
                   onEditTask={setEditingTask}
                   onDeleteTask={deleteTask}
+                  onUpdateTask={updateTask}
                   onPin={(id) => setPinnedColumnId(id)}
                 />
               ))}
@@ -484,6 +497,8 @@ export function KanbanBoard() {
         onAdd={addTask}
         defaultColumn={addColumnTarget ?? (columnIds[0] || '')}
         columns={boardColumns}
+        tagHistory={tagHistory}
+        onAddToTagHistory={addToTagHistory}
       />
 
       <EditTaskModal
@@ -492,6 +507,8 @@ export function KanbanBoard() {
         onSave={handleEditSave}
         onDelete={deleteTask}
         columns={boardColumns}
+        tagHistory={tagHistory}
+        onAddToTagHistory={addToTagHistory}
       />
 
       <ColumnManagerModal

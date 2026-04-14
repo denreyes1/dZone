@@ -40,6 +40,7 @@ interface PinnedColumnViewProps {
   onAddClick: () => void;
   onEditTask: (task: BoardTask) => void;
   onDeleteTask: (id: string) => void;
+  onUpdateTask?: (id: string, updates: Partial<BoardTask>) => void;
   onReorder: (tasks: { id: string; order: number }[]) => void;
   externalDnd?: boolean;
 }
@@ -52,6 +53,7 @@ export function PinnedColumnView({
   onAddClick,
   onEditTask,
   onDeleteTask,
+  onUpdateTask,
   onReorder,
   externalDnd = false,
 }: PinnedColumnViewProps) {
@@ -130,6 +132,7 @@ export function PinnedColumnView({
             task={task}
             onEdit={onEditTask}
             onDelete={onDeleteTask}
+            onUpdate={onUpdateTask}
           />
         ))}
 

@@ -1,10 +1,11 @@
 import { Clock } from 'lucide-react';
 import { useSessions } from '@/hooks/useSessions';
 import { formatDuration } from '@/utils/formatTime';
-import { SCENES } from '@/utils/constants';
+import { useSceneHistory } from '@/hooks/useSceneHistory';
 
 export function SessionHistory() {
   const { recentSessions } = useSessions();
+  const { allScenes } = useSceneHistory();
 
   if (recentSessions.length === 0) {
     return (
@@ -17,7 +18,7 @@ export function SessionHistory() {
   return (
     <div className="space-y-2">
       {recentSessions.slice(0, 5).map((session) => {
-        const scene = SCENES.find((s) => s.id === session.sceneId);
+        const scene = allScenes.find((s) => s.id === session.sceneId);
         return (
           <div
             key={session.id}
